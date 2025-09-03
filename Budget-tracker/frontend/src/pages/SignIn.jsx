@@ -1,20 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import Particles from "../components/Particles.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function SignIn() {
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ New state
+  const [form, setForm] = useState({ usernameOrEmail: "", password: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
+  // ✅ Handle input changes
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // ✅ Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Submitted:", form);
-
-    setIsSubmitting(true); // ✅ disable button
+    setIsSubmitting(true);
 
     try {
       const res = await fetch("http://localhost:5000/sign-in", {
@@ -23,16 +25,42 @@ export default function SignIn() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(form),
+        credentials: "include", // ✅ allow cookies (JWT token)
       });
 
       const data = await res.json();
-      console.log("Response from backend:", data);
+      console.log("Response:", data);
+
+      if (res.ok) {
+        localStorage.setItem("token", data.token); // ✅ save token
+        navigate("/DashBoard"); // ✅ redirect
+      } else {
+        alert(data.error || "Sign in failed");
+      }
     } catch (err) {
       console.error("Error submitting form:", err);
+      alert("Something went wrong. Try again!");
     } finally {
-      setIsSubmitting(false); // ✅ enable button back
+      setIsSubmitting(false);
     }
   };
+
+  // ✅ Google Login Redirect
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:5000/auth/google";
+  };
+
+  // ✅ Capture token from URL after Google redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+      navigate("/DashBoard"); // redirect to home
+      window.history.replaceState({}, document.title, "/DashBoard"); // clean URL
+    }
+  }, [navigate]);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
@@ -56,35 +84,23 @@ export default function SignIn() {
           Welcome Back
         </h2>
         <p className="text-gray-400 text-center mb-8 text-sm">
-          Sign in to continue to your account
+          Sign in with your username or email
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Username */}
+          {/* Username or Email */}
           <div className="text-left">
-            <label className="block text-gray-300 text-sm mb-2">UserName</label>
+            <label className="block text-gray-300 text-sm mb-2">
+              Username or Email
+            </label>
             <input
               type="text"
-              name="username"
-              value={form.username}
+              name="usernameOrEmail"
+              value={form.usernameOrEmail}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 rounded-xl bg-gray-800/80 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none transition"
-              placeholder="john_doe"
-            />
-          </div>
-
-          {/* Email */}
-          <div className="text-left">
-            <label className="block text-gray-300 text-sm mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 rounded-xl bg-gray-800/80 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none transition"
-              placeholder="you@example.com"
+              placeholder="john_doe or you@example.com"
             />
           </div>
 
@@ -97,6 +113,7 @@ export default function SignIn() {
               value={form.password}
               onChange={handleChange}
               required
+              minLength={6}
               className="w-full px-4 py-3 rounded-xl bg-gray-800/80 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none transition"
               placeholder="••••••••"
             />
@@ -116,7 +133,7 @@ export default function SignIn() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting} // ✅ Disable while submitting
+            disabled={isSubmitting}
             className={`w-full bg-gradient-to-r from-purple-600 to-purple-700 
               hover:from-purple-700 hover:to-purple-800 text-white font-semibold 
               py-3 rounded-xl transition transform hover:scale-[1.02] shadow-lg
@@ -134,7 +151,10 @@ export default function SignIn() {
         </div>
 
         {/* Google Sign in */}
-        <button className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 font-medium py-3 rounded-xl shadow-md hover:bg-gray-100 transition">
+        <button
+          onClick={handleGoogleLogin}
+          className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 font-medium py-3 rounded-xl shadow-md hover:bg-gray-100 transition"
+        >
           <FcGoogle size={22} /> Continue with Google
         </button>
 
