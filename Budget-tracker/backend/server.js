@@ -183,7 +183,3 @@ app.get("/auth/google/callback",
 );
 
 export default app;
-<<<<<<< HEAD
-=======
-
->>>>>>> df68409 (Save current changes before pulling)
