@@ -182,4 +182,4 @@ app.get("/auth/google/callback",
   }
 );
 
-module.exports = app;
+export default app;
