@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.ejs": "html",
+        "exp4a.C": "cpp",
+        "exp4b.C": "cpp"
+    }
+}

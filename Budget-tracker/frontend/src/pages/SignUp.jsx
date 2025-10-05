@@ -5,22 +5,19 @@ import { useNavigate } from "react-router-dom";
 
 export default function SignUp() {
   const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  // 🔹 Handle input change
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-//🔹 e → event object hota hai (jab input change hota hai).
-// 🔹 e.target → jis input field par likh rahe ho usko represent karta hai.
-// 🔹 e.target.name → us input ka name attribute (for example: "email", "password").
-// 🔹 e.target.value → us input ka naya value.
 
+  // 🔹 Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form Submitted:", form);
-
-    setIsSubmitting(true); 
-
+    setIsSubmitting(true);
 
     try {
       const res = await fetch("http://localhost:5000/sign-up", {
@@ -32,23 +29,26 @@ export default function SignUp() {
       });
 
       const data = await res.json();
-      if(res.ok){
+      if (res.ok) {
         alert("Sign Up Successful!");
         localStorage.setItem("token", data.token);
         navigate("/DashBoard");
-      }else{
+      } else {
         alert(data.error || "Sign Up Failed");
       }
       console.log("Response from backend:", data);
     } catch (err) {
       console.error("Error submitting form:", err);
     } finally {
-      setIsSubmitting(false); // ✅ enable button back
+      setIsSubmitting(false);
     }
   };
-    const handleGoogleLogin = () => {
-  window.location.href = "http://localhost:5000/auth/google";
-    };
+
+  // 🔹 Google OAuth redirect
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:5000/auth/google";
+  };
+
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
       {/* Particle Background */}
@@ -65,19 +65,19 @@ export default function SignUp() {
         />
       </div>
 
-      {/* Sign In Card */}
+      {/* Sign Up Card */}
       <div className="relative z-10 w-full max-w-md bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-[0_0_25px_rgba(0,0,0,0.8)] border border-gray-800 p-8">
         <h2 className="text-3xl font-extrabold text-center text-white tracking-wide">
-          Welcome Back
+          Create Account
         </h2>
         <p className="text-gray-400 text-center mb-8 text-sm">
-          Sign in to continue to your account
+          Sign up to get started with your account
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Username */}
           <div className="text-left">
-            <label className="block text-gray-300 text-sm mb-2">UserName</label>
+            <label className="block text-gray-300 text-sm mb-2">Username</label>
             <input
               type="text"
               name="username"
@@ -131,13 +131,13 @@ export default function SignUp() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting} // ✅ Disable while submitting
+            disabled={isSubmitting}
             className={`w-full bg-gradient-to-r from-purple-600 to-purple-700 
               hover:from-purple-700 hover:to-purple-800 text-white font-semibold 
               py-3 rounded-xl transition transform hover:scale-[1.02] shadow-lg
               ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            {isSubmitting ? "Signing in..." : "Sign In"}
+            {isSubmitting ? "Signing up..." : "Sign Up"}
           </button>
         </form>
 
@@ -149,14 +149,12 @@ export default function SignUp() {
         </div>
 
         {/* Google Sign in */}
-       <button 
-  onClick={handleGoogleLogin}
-  className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 font-medium py-3 rounded-xl shadow-md hover:bg-gray-100 transition">
-  <FcGoogle size={22} /> Continue with Google
-</button>
-        
-
-        {/* Sign Up */}
+        <button
+          onClick={handleGoogleLogin}
+          className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 font-medium py-3 rounded-xl shadow-md hover:bg-gray-100 transition"
+        >
+          <FcGoogle size={22} /> Continue with Google
+        </button>
       </div>
     </div>
   );
